@@ -33,6 +33,13 @@ PROPERTY_SCORE_WEIGHTAGE = {
 
 # check whether the link is active or not
 def validate_url(url):
+    """
+    Function to validate the URL
+    Args:
+    url : str : URL to validate
+    Returns:
+    int : status code of the URL
+    """
     try:
         response = requests.get(url)
         return response.status_code
@@ -41,6 +48,13 @@ def validate_url(url):
         return False
 
 def include_protocol(url):
+    """
+    Function to include protocol in the URL
+    Args:
+    url : str : URL
+    Returns:
+    str : URL with protocol
+    """
     try:
         if not url.startswith('http://') and not url.startswith('https://'):
             url = 'https://' + url
@@ -51,9 +65,16 @@ def include_protocol(url):
 
 # get domain rank if it exists in top 1M list
 def get_domain_rank(domain):
-    rank = DomainRank.objects.filter(domain_name=domain).first()
+    """
+    Function to get the rank of a domain
+    Args:
+    domain : str : domain name
+    Returns:
+    int : rank of the domain
+    """
+    rank = DomainRank.get_rank(domain_name=domain)
     if rank:
-        return int(rank.rank)
+        return int(rank)
     else:
         return 0
 
@@ -65,6 +86,13 @@ def get_domain_rank(domain):
 
 # get whois data of domain
 def whois_data(domain):
+    """
+    Function to get the WHOIS data of a domain
+    Args:
+    domain : str : domain name
+    Returns:
+    dict : WHOIS data of the domain
+    """
     try:
         whois_data = whois.whois(domain)
         creation_date = whois_data.creation_date
@@ -106,12 +134,31 @@ def whois_data(domain):
 
 
 def pascal_case(s):
+    """
+    Function to convert snake_case to PascalCase
+    Args:
+    s : str : snake_case string
+    Returns:
+    str : PascalCase string
+
+    Example:
+    pascal_case('hello_world') -> 'Hello World'
+    """
     result = s.replace('_',' ').title()
     return result
 
 
-# check for HSTS support
-def hsts_support(url): # url should be http / https as prefix
+def hsts_support(url):
+    """
+    Function to check whether the URL supports HSTS
+    Args:
+    url : str : URL
+    Returns:
+    int : 1 if HSTS is supported, 0 otherwise
+
+    Example:
+    hsts_support('https://www.google.com') -> 1
+    """
     try:
         response = requests.get(url)
         headers = response.headers
@@ -123,8 +170,17 @@ def hsts_support(url): # url should be http / https as prefix
         return 0
 
 
-# check for URL shortening services
 def is_url_shortened(domain): 
+    """
+    Function to check whether the URL is shortened
+    Args:
+    domain : str : domain name
+    Returns:
+    int : 1 if URL is shortened, 0 otherwise
+
+    Example:
+    is_url_shortened('https://bit.ly') -> 1
+    """
     try:
         with open('static/data/url-shorteners.txt') as f:
             services_arr = f.read().splitlines()
@@ -137,8 +193,17 @@ def is_url_shortened(domain):
         return 0
 
 
-# check if an IP is present in the URL
 def ip_present(url):
+    """
+    Function to check whether the IP address is present in the URL
+    Args:
+    url : str : URL
+    Returns:
+    int : 1 if IP address is present, 0 otherwise
+
+    Example:
+    ip_present('https://111.222.333.444') -> 1
+    """
     try:
         ipaddress.ip_address(url)
         result = 1
@@ -147,8 +212,17 @@ def ip_present(url):
     return result
 
 
-# check for website redirects
 def url_redirects(url):
+    """
+    Function to check whether the URL is redirected
+    Args:
+    url : str : URL
+    Returns:
+    int : 1 if URL is redirected, 0 otherwise
+    
+    Example:
+    url_redirects('https://www.google.com') -> 0
+    """
     try:
         response = requests.get(url)
         if len(response.history) > 1:
@@ -160,11 +234,10 @@ def url_redirects(url):
         else:
             return 0
     except Exception as e:
-        # print(f"Error: {e}")
+        print(f"Error: {e}")
         return 0
 
 
-# check whether the URL is too long 
 def too_long_url(url):
     if len(url) > 75:
         return 1
@@ -172,9 +245,20 @@ def too_long_url(url):
         return 0
 
 
-# check whether the URL is too deep 
 def too_deep_url(url):
-    slashes = -2 # to skip first two slashes after protocol, i.e. https://
+    """
+    Function to check whether the URL is too deep
+    Args:
+    url : str : URL
+    Returns:
+    int : 1 if URL is too deep, 0 otherwise
+
+    Example:
+    too_deep_url('https://www.google.com/abc/def/ghi/jkl/mno/pqr/stu/vwx/yz') -> 1
+
+    too_deep_url('https://www.google.com') -> 0
+    """
+    slashes = -2 
     for i in url:
         if i == '/':
             slashes += 1
@@ -186,8 +270,17 @@ def too_deep_url(url):
 
 
 
-# check whether the URL is having 
 def content_check(url):
+    """
+    Function to check the content of the URL
+    Args:
+    url : str : URL
+    Returns:
+    dict : content of the URL
+
+    Example:
+    content_check('https://www.google.com') -> {'onmouseover': 0, 'right-click': 0, 'form': 0, 'iframe': 0, 'login': 0, 'popup': 0}
+    """
     try:
 
         response = requests.get(url)
@@ -230,7 +323,9 @@ def content_check(url):
 
 
 def phishtank_search(url):
-
+    """
+    Function to search the URL on Phishtank
+    """
     try:
         endpoint = "https://checkurl.phishtank.com/checkurl/"
         response = requests.post(endpoint, data={"url": url, "format": "json"})
@@ -257,6 +352,9 @@ def get_ip(domain):
 
 
 def get_certificate_details(domain):
+    """
+    Function to get the certificate details of a domain
+    """
     try:
         context = ssl.create_default_context()
         with socket.create_connection((domain, 443)) as sock:
@@ -321,6 +419,16 @@ def get_certificate_details(domain):
 
 
 def calculate_trust_score(current_score, case, value):
+    """
+    Function to calculate the trust score of a URL
+    Args:
+    current_score : int : current trust score of the URL
+    case : str : property to check
+    value : int : value of the property
+    Returns:
+    int : updated trust score of the URL
+
+    """
 
     score = current_score
 

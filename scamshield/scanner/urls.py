@@ -16,8 +16,10 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from .views import ScanUrlView
+from .views import ScanUrlView, ReportSpamUrlView , SearchBlacklistView
 
 urlpatterns = [
-   path('scan/',ScanUrlView.as_view(), name='scan-url'),
+    path('scan/',ScanUrlView.as_view(), name='scan-url'),
+    path('blacklist/add/', ReportSpamUrlView.as_view(), name='report-spam-url'),
+    path('blacklist/', SearchBlacklistView.as_view(), name='search-blacklist'),
 ]

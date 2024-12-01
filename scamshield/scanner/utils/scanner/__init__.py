@@ -3,13 +3,39 @@ import tldextract
 import scanner.utils.scanner.helper as helper
 import time
 from rest_framework.exceptions import APIException
+"""
 
+Scanner class to scan the URL and return the report.
+
+
+"""
 class Scanner:
+    """
+    
+    Scanner class to scan the URL and return the report.
+    Example:
+    ```
+    scanner = Scanner()
+    report = scanner.scan("https://www.google.com")
+    print(report)
+    ```
+    """
     def __init__(self):
         self.BASE_SCORE = 50  # default trust score of URL out of 100
         self.model = helper
 
     def scan(self, url):
+        """
+        
+        Scan the URL and return the report.
+        :param url: URL to scan
+        :return: Report of the URL
+
+        ```
+        report = scanner.scan("https://www.google.com")
+        print(report)
+        ```
+        """
         try:
             # Input validation
             print(time.time(), "entry")
