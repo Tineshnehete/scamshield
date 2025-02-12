@@ -16,9 +16,12 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-
+from rest_framework.authtoken import views
+# csrf exempt
+from django.views.decorators.csrf import csrf_exempt as csr
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api-auth/', include('rest_framework.urls')),
     path('scanner/', include('scanner.urls')),  # Include your app's URLs
+    path('api-token-auth/', csr( views.obtain_auth_token), name='api_token_auth'),  # Add this
 ]

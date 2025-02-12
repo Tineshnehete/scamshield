@@ -11,9 +11,9 @@ import json
 import time
 import socket
 import ssl
-from ...models import DomainRank
+from ...models import DomainRank, Blacklist
 from rest_framework.exceptions import APIException
-
+import tldextract
 global BASE_SCORE
 global PROPERTY_SCORE_WEIGHTAGE
 BASE_SCORE = 50  # default trust_ score of url out of 100
@@ -26,7 +26,9 @@ PROPERTY_SCORE_WEIGHTAGE = {
     'url_redirects': 0.2,
     'too_long_url': 0.1,
     'too_deep_url': 0.5,
-    'content': 0.1
+    'content': 0.1,
+    'phishtank': 0.9,
+    'blacklist': 0.9,
 }
 
 
@@ -130,7 +132,7 @@ def whois_data(domain):
 
     except Exception as e:
         print(f"Error: {e}")
-        return False
+        return { }
 
 
 def pascal_case(s):
@@ -329,15 +331,31 @@ def phishtank_search(url):
     try:
         endpoint = "https://checkurl.phishtank.com/checkurl/"
         response = requests.post(endpoint, data={"url": url, "format": "json"})
+        print(response)
         data = json.loads(response.content)
+        print(data)
         if data['results']['valid'] == True:
             return 1
         return 0
 
     except Exception as e:
-        # print(f"Error: {e}")
+        print(f"Error: {e}")
         return 0
 
+def blacklist_search(url):
+    """
+    Function to search the URL on Blacklist
+    """
+    # check if url or domain or ip in blacklist 
+    try:
+        domain = tldextract.extract(url).domain + '.' + tldextract.extract(url).suffix
+        ip = get_ip(domain)
+        if Blacklist.objects.filter(url=url, status="approved" ).exists() or Blacklist.objects.filter(domain=domain ,status="approved").exists() or Blacklist.objects.filter(domain=ip,status="approved").exists():
+            return 1
+        return 0
+    except Exception as e:
+        # print(f"Error: {e}")
+        return 0
 
 def get_ip(domain):
 
@@ -482,4 +500,19 @@ def calculate_trust_score(current_score, case, value):
     elif case == 'too_deep_url':
         if value == 1:
             score = current_score - (PROPERTY_SCORE_WEIGHTAGE['too_deep_url'] * BASE_SCORE)
+        return score
+    
+    elif case == 'content':
+        if value:
+            score = current_score - (PROPERTY_SCORE_WEIGHTAGE['content'] * BASE_SCORE)
+        return score
+    
+    elif case == 'phishtank':
+        if value == 1:
+            score = current_score - (PROPERTY_SCORE_WEIGHTAGE['phishtank'] * BASE_SCORE)
+        return score
+    
+    elif case == 'blacklist':
+        if value == 1:
+            score = current_score - (PROPERTY_SCORE_WEIGHTAGE['blacklist'] * BASE_SCORE)
         return score

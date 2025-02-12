@@ -53,6 +53,7 @@ class Scanner:
             # Phishtank check
             phishtank_response = self.model.phishtank_search(url)
             print(time.time(), "phishtank_search")
+            print(phishtank_response)
             if phishtank_response:
                 response['msg'] = "This is a verified phishing link."
 
@@ -67,9 +68,13 @@ class Scanner:
 
             # Domain age and WHOIS data
             whois_data = self.model.whois_data(domain)
+            print(time.time(), whois_data)
             print(time.time(), "whois_data")
-            trust_score = self.model.calculate_trust_score(trust_score, 'domain_age', whois_data['age'])
-            response['age'] = whois_data['age'] if whois_data['age'] == 'Not Given' else f"{round(whois_data['age'], 1)} year(s)"
+            try:
+                trust_score = self.model.calculate_trust_score(trust_score, 'domain_age', whois_data['age'])
+                response['age'] = whois_data['age'] if whois_data['age'] == 'Not Given' else f"{round(whois_data['age'], 1)} year(s)"            
+            except Exception as e:
+                print(e)
             response['whois'] = whois_data['data']
 
             # Is URL shortened
@@ -118,6 +123,16 @@ class Scanner:
             print(time.time(), "get_certificate_details")
             response['ssl'] = ssl
 
+            # check  content
+            content = self.model.content_check(url)
+            print(time.time(), "check_content")
+            trust_score = self.model.calculate_trust_score(trust_score, 'content', content)
+
+
+            # blacklist 
+            blacklist = self.model.blacklist_search(url)
+            trust_score = self.model.calculate_trust_score(trust_score, 'blacklist', blacklist)
+
             trust_score = int(max(min(trust_score, 100), 0))
             response['trust_score'] = trust_score
 
@@ -127,5 +142,5 @@ class Scanner:
 
         except Exception as e:
             print(f"Error: {e}")
-            response = {'status': 'ERROR', 'url': url, 'msg': "Some error occurred, please check the URL.",'emsg':e}
+            response = {'status': 'ERROR', 'url': url, 'msg': "Some error occurred, please check the URL.",'emsg':str(e)}
             return response

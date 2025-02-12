@@ -16,10 +16,15 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from .views import ScanUrlView, ReportSpamUrlView , SearchBlacklistView
+from .views import ScanUrlView, ReportSpamUrlView , SearchBlacklistView , BlackListRemovalRequestView , register
+# DomainRankView , DomainRankListView 
 
 urlpatterns = [
     path('scan/',ScanUrlView.as_view(), name='scan-url'),
     path('blacklist/add/', ReportSpamUrlView.as_view(), name='report-spam-url'),
     path('blacklist/', SearchBlacklistView.as_view(), name='search-blacklist'),
+    path('blacklist/removal-request/', BlackListRemovalRequestView.as_view(), name='blacklist-removal-request'),
+    path('api-auth/signup', register, name='register'),
+    # path('domain-rank/', DomainRankView.as_view(), name='domain-rank'),
+    # path('domain-rank/list/', DomainRankListView.as_view(), name='domain-rank-list'),
 ]
