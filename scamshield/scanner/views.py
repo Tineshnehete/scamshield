@@ -21,7 +21,7 @@ class ScanUrlView( views.APIView):
             # check if the url is already scanned in last month
             if ScanReport.objects.filter(url=url , created_at__gte=timezone.now() - timedelta(days=30)  
                                          ).exists():
-                report = ScanReport.objects.get(url=url)
+                report = ScanReport.objects.filter(url=url).first()
                 return response.Response({'url': url, "report": json.loads(report.report)
                                       }, status=status.HTTP_200_OK)
             scanner = Scanner()

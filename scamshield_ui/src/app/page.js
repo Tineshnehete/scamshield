@@ -2,35 +2,62 @@
 import ReportUrlForm from "@/components/reporturlform";
 import Scanner from "@/utils/scanner";
 import Image from "next/image";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export default function Home() {
   const [report, setReport] = useState(null);
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [url, setUrl] = useState("");
+  // const [url, setUrl] = useState(
+  //   //  url from the query string
+    
+  // );
+
+  const url = typeof window !== "undefined" && new URLSearchParams(window.location.search).get("url") || null;
+
+  useEffect(()=>{
+    const ex = async () => {
+      if (url) {
+        await Scanner.scan(url)
+        .then((data) => {
+          console.log(data);
+          setReport(data?.report);
+        })
+        .catch((error) => {
+          if (error.response) {
+            setError(error.response.data.error);
+          }
+        })
+        .finally(() => {
+          setIsLoading(false);
+        });
+      }
+    }
+
+    ex()
+  }, [url]);
 
   console.log(report?.trust_score);
 
   const handleSubmit = async (event) => {
-    event.preventDefault();
-    const url = event.target.url.value;
-    setUrl(url);
-    setError(null);
-    setIsLoading(true);
-    await Scanner.scan(url)
-      .then((data) => {
-        console.log(data);
-        setReport(data?.report);
-      })
-      .catch((error) => {
-        if (error.response) {
-          setError(error.response.data.error);
-        }
-      })
-      .finally(() => {
-        setIsLoading(false);
-      });
+    // event.preventDefault();
+    // const url = event.target.url.value;
+    // setUrl(url);
+    // setError(null);
+    // setIsLoading(true);
+    // await Scanner.scan(url)
+    //   .then((data) => {
+    //     console.log(data);
+    //     setReport(data?.report);
+    //   })
+    //   .catch((error) => {
+    //     if (error.response) {
+    //       setError(error.response.data.error);
+    //     }
+    //   })
+    //   .finally(() => {
+    //     setIsLoading(false);
+    //   });
   };
 
   return (
@@ -49,6 +76,7 @@ export default function Home() {
               type="url"
               id="url"
               name="url"
+              defaultValue={url || "" }
               placeholder="https://example.com"
               disabled={isLoading}
             />

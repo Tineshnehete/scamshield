@@ -3,6 +3,7 @@ import tldextract
 import scanner.utils.scanner.helper as helper
 import time
 from rest_framework.exceptions import APIException
+from .gemini import detect_website
 """
 
 Scanner class to scan the URL and return the report.
@@ -128,6 +129,11 @@ class Scanner:
             print(time.time(), "check_content")
             trust_score = self.model.calculate_trust_score(trust_score, 'content', content)
 
+            # check  content with gemini
+            gemini_content = self.model.check_content_gm(url)
+            print(time.time(), "check_content_gm")
+            trust_score = self.model.calculate_trust_score(trust_score, 'gemini_content', gemini_content)
+            response['content_detection'] = gemini_content
 
             # blacklist 
             blacklist = self.model.blacklist_search(url)

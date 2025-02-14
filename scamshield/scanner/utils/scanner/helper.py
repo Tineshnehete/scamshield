@@ -29,6 +29,7 @@ PROPERTY_SCORE_WEIGHTAGE = {
     'content': 0.1,
     'phishtank': 0.9,
     'blacklist': 0.9,
+    'geminai': 0.9
 }
 
 
@@ -431,7 +432,7 @@ def get_certificate_details(domain):
                 }
     except Exception as e:
         print(f"Error: {e}")
-        return 0
+        return {}
 
 
 
@@ -516,3 +517,32 @@ def calculate_trust_score(current_score, case, value):
         if value == 1:
             score = current_score - (PROPERTY_SCORE_WEIGHTAGE['blacklist'] * BASE_SCORE)
         return score
+    
+    elif case == 'gemini_content':
+        if value['label'] in ['phishing', 'piracy']:
+            score = current_score - (PROPERTY_SCORE_WEIGHTAGE['geminai'] * BASE_SCORE)
+        if value['label'] == 'hightrust':
+            score = current_score + (PROPERTY_SCORE_WEIGHTAGE['geminai'] * BASE_SCORE)
+        return score
+
+def check_content_gm(url):
+    """
+    Function to check the content of the URL using Gemini AI
+    Args:
+    url : str : URL
+    Returns:
+    dict : content of the URL
+
+    Example:
+    check_content_gm('https://www.google.com') -> {'label': 'legitimate', 'score': 0.9}
+    """
+    from .gemini import detect_website
+
+    try:
+        response = requests.get(url)
+        soup = BeautifulSoup(response.content, 'html.parser')
+        response = detect_website(soup.text , url)
+        return response
+    except Exception as e:
+        print(f"Error: {e}")
+        return {"label": "unknown"}

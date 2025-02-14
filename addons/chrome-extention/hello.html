@@ -1,6 +1,67 @@
+<!DOCTYPE html>
 <html>
-  <body>
-    <h1>Hello Extensions</h1>
+<head>
+    <title>ScamShield Report</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #0d1117;
+            color: #ffffff;
+        }
+        .container {
+            max-width: 600px;
+            margin: auto;
+            background: #161b22;
+            padding: 20px;
+            border-radius: 10px;
+            /* box-shadow: 0px 0px 10px rgba(0, 123, 255, 0.2); */
+        }
+        .boxed {
+            padding: 10px;
+            border-radius: 5px;
+            text-align: center;
+            font-weight: bold;
+        }
+        h2 {
+            color: #007bff;
+            /* color: #ffffff; */
+            padding: 10px;
+            border-radius: 5px;
+            /* text-align: center; */
+        }
+        pre {
+            background: #21262d;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+            color: #ccc;
+        }
+        p {
+            margin: 5px 0;
+        }
+        .score {
+            font-weight: bold;
+            padding: 10px;
+            border-radius: 5px;
+            display: inline-block;
+            text-align: center;
+            width: 100px;
+        }
+        .message {
+            margin-top: 10px;
+            font-size: 1rem;
+            font-weight: bold;
+            /* text-align: center; */
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Website Report</h2>
+        <div id="result">Loading...</div>
+    </div>
     <script src="popup.js"></script>
-  </body>
+   
+</body>
 </html>
